@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MK1.ui'
+# Form implementation generated from reading ui file '.\MK1.ui'
 #
 # Created by: PyQt5 UI code generator 5.13.0
 #
@@ -77,6 +77,9 @@ class Ui_MK1(object):
         self.SS_device.setGeometry(QtCore.QRect(60, 60, 601, 16))
         self.SS_device.setText("")
         self.SS_device.setObjectName("SS_device")
+        self.device = QtWidgets.QComboBox(self.groupBox_2)
+        self.device.setGeometry(QtCore.QRect(60, 20, 601, 22))
+        self.device.setObjectName("device")
         self.groupBox_3 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_3.setGeometry(QtCore.QRect(20, 140, 201, 241))
         self.groupBox_3.setObjectName("groupBox_3")
