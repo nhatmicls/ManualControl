@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\MK1.ui'
+# Form implementation generated from reading ui file 'MK1.ui'
 #
 # Created by: PyQt5 UI code generator 5.13.0
 #
@@ -9,6 +9,9 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+NameCOM=[]
+transmit=[]
+comconnect=False
 
 class Ui_MK1(object):
     def setupUi(self, MK1):
@@ -59,6 +62,10 @@ class Ui_MK1(object):
         self.label_3 = QtWidgets.QLabel(self.groupBox_2)
         self.label_3.setGeometry(QtCore.QRect(20, 40, 47, 16))
         self.label_3.setObjectName("label_3")
+        self.name_device = QtWidgets.QLabel(self.groupBox_2)
+        self.name_device.setGeometry(QtCore.QRect(60, 20, 601, 16))
+        self.name_device.setText("")
+        self.name_device.setObjectName("name_device")
         self.ID_device = QtWidgets.QLabel(self.groupBox_2)
         self.ID_device.setGeometry(QtCore.QRect(60, 40, 601, 16))
         self.ID_device.setText("")
@@ -70,9 +77,6 @@ class Ui_MK1(object):
         self.SS_device.setGeometry(QtCore.QRect(60, 60, 601, 16))
         self.SS_device.setText("")
         self.SS_device.setObjectName("SS_device")
-        self.device = QtWidgets.QComboBox(self.groupBox_2)
-        self.device.setGeometry(QtCore.QRect(60, 20, 601, 22))
-        self.device.setObjectName("device")
         self.groupBox_3 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_3.setGeometry(QtCore.QRect(20, 140, 201, 241))
         self.groupBox_3.setObjectName("groupBox_3")
@@ -118,6 +122,8 @@ class Ui_MK1(object):
         self.statusbar.setObjectName("statusbar")
         MK1.setStatusBar(self.statusbar)
 
+        self.connect.clicked.connect(self.connectbtn)
+
         self.retranslateUi(MK1)
         QtCore.QMetaObject.connectSlotsByName(MK1)
 
@@ -136,7 +142,8 @@ class Ui_MK1(object):
         self.COM.setItemText(7, _translate("MK1", "COM8"))
         self.COM.setItemText(8, _translate("MK1", "COM9"))
         self.COM.setItemText(9, _translate("MK1", "COM10"))
-        self.connect.setText(_translate("MK1", "DISCONNECT"))
+        self.connect.setStyleSheet('QPushButton {color: green;}')
+        self.connect.setText(_translate("MK1", "CONNECT"))
         self.label.setText(_translate("MK1", "COM:"))
         self.groupBox_2.setTitle(_translate("MK1", "Joystick"))
         self.label_2.setText(_translate("MK1", "Device:"))
@@ -155,3 +162,34 @@ class Ui_MK1(object):
         self.groupBox_5.setTitle(_translate("MK1", "Axis"))
         self.groupBox_6.setTitle(_translate("MK1", "Analysis"))
         self.groupBox_7.setTitle(_translate("MK1", "Status"))
+
+    def connectbtn(self):
+        global comconnect
+        NameCOM=self.COM.currentText()
+        try:
+            transmit=serial.Serial(NameCOM,115200,timeout=2.5)
+            if(comconnect==False):
+                self.COM.setEnabled(False)
+                self.connect.setText('DISCONNECT')
+                self.connect.setStyleSheet('QPushButton {color: red;}')
+                self.re_se_data.append('Serial port ' + NameCOM + ' opened')
+                comconnect=True
+            else:
+                self.COM.setEnabled(True)
+                transmit.close()
+                self.connect.setText('CONNECT')
+                self.connect.setStyleSheet('QPushButton {color: green;}')
+                self.re_se_data.append('Serial port ' + NameCOM + ' closed')
+                comconnect=False
+        except IOError:
+            self.re_se_data.append('Serial port ' + NameCOM + ' opening error')
+            
+if __name__ == "__main__":
+    import sys
+    import serial
+    app = QtWidgets.QApplication(sys.argv)
+    MK1 = QtWidgets.QMainWindow()
+    ui = Ui_MK1()
+    ui.setupUi(MK1)
+    MK1.show()
+    sys.exit(app.exec_())
