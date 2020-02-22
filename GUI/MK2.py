@@ -7,6 +7,7 @@
 # WARNING! All changes made in this file will be lost!
 
 
+from pyqtgraph import PlotWidget
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -101,9 +102,49 @@ class Ui_MK1(object):
             self.re_se_data.sizePolicy().hasHeightForWidth())
         self.re_se_data.setSizePolicy(sizePolicy)
         self.re_se_data.setObjectName("re_se_data")
-        self.groupBox_5 = QtWidgets.QGroupBox(self.centralwidget)
-        self.groupBox_5.setGeometry(QtCore.QRect(230, 140, 671, 241))
-        self.groupBox_5.setObjectName("groupBox_5")
+        self.gr_axis = QtWidgets.QGroupBox(self.centralwidget)
+        self.gr_axis.setGeometry(QtCore.QRect(230, 140, 671, 241))
+        self.gr_axis.setObjectName("gr_axis")
+        self.xaxis = PlotWidget(self.gr_axis)
+        self.xaxis.setGeometry(QtCore.QRect(10, 20, 151, 211))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(
+            self.xaxis.sizePolicy().hasHeightForWidth())
+        self.xaxis.setSizePolicy(sizePolicy)
+        self.xaxis.setObjectName("xaxis")
+        self.yaxis = PlotWidget(self.gr_axis)
+        self.yaxis.setGeometry(QtCore.QRect(170, 20, 151, 211))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(
+            self.yaxis.sizePolicy().hasHeightForWidth())
+        self.yaxis.setSizePolicy(sizePolicy)
+        self.yaxis.setObjectName("yaxis")
+        self.xaxis_1 = PlotWidget(self.gr_axis)
+        self.xaxis_1.setGeometry(QtCore.QRect(350, 20, 151, 211))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(
+            self.xaxis_1.sizePolicy().hasHeightForWidth())
+        self.xaxis_1.setSizePolicy(sizePolicy)
+        self.xaxis_1.setObjectName("xaxis_1")
+        self.yaxis_1 = PlotWidget(self.gr_axis)
+        self.yaxis_1.setGeometry(QtCore.QRect(510, 20, 151, 211))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(
+            self.yaxis_1.sizePolicy().hasHeightForWidth())
+        self.yaxis_1.setSizePolicy(sizePolicy)
+        self.yaxis_1.setObjectName("yaxis_1")
         self.groupBox_6 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_6.setGeometry(QtCore.QRect(20, 390, 881, 301))
         self.groupBox_6.setObjectName("groupBox_6")
@@ -121,7 +162,7 @@ class Ui_MK1(object):
         self.groupBox.raise_()
         self.groupBox_3.raise_()
         self.groupBox_4.raise_()
-        self.groupBox_5.raise_()
+        self.gr_axis.raise_()
         self.groupBox_6.raise_()
         self.groupBox_7.raise_()
         MK1.setCentralWidget(self.centralwidget)
@@ -163,17 +204,7 @@ class Ui_MK1(object):
                                            "p, li { white-space: pre-wrap; }\n"
                                            "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
                                            "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
-        self.groupBox_5.setTitle(_translate("MK1", "Axis"))
+        self.gr_axis.setTitle(_translate("MK1", "Axis"))
         self.groupBox_6.setTitle(_translate("MK1", "Analysis"))
         self.groupBox_7.setTitle(_translate("MK1", "Status"))
         self.label_5.setText(_translate("MK1", "Mode:"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MK1 = QtWidgets.QMainWindow()
-    ui = Ui_MK1()
-    ui.setupUi(MK1)
-    MK1.show()
-    sys.exit(app.exec_())

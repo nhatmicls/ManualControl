@@ -8,14 +8,21 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from enum import Enum
-import serial
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use("Qt5Agg")
+from enum import Enum
+
+import pygame
+import time
+import serial
+import math
+
+# define number
+X_min = 0
+X_max = 15
+Y_min = 0
+Y_max = 15
 
 
 class mode(Enum):
@@ -28,6 +35,7 @@ NameCOM = []
 transmit = []
 comconnect = False
 control = mode.stop
+lastcontrol = mode.stop
 
 
 class Ui_MK1(object):
@@ -93,7 +101,7 @@ class Ui_MK1(object):
         self.SS_device.setText("")
         self.SS_device.setObjectName("SS_device")
         self.device = QtWidgets.QComboBox(self.groupBox_2)
-        self.device.setGeometry(QtCore.QRect(60, 19, 601, 21))
+        self.device.setGeometry(QtCore.QRect(60, 20, 601, 22))
         self.device.setObjectName("device")
         self.groupBox_3 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_3.setGeometry(QtCore.QRect(20, 140, 201, 241))
@@ -121,9 +129,49 @@ class Ui_MK1(object):
             self.re_se_data.sizePolicy().hasHeightForWidth())
         self.re_se_data.setSizePolicy(sizePolicy)
         self.re_se_data.setObjectName("re_se_data")
-        self.groupBox_5 = QtWidgets.QGroupBox(self.centralwidget)
-        self.groupBox_5.setGeometry(QtCore.QRect(230, 140, 671, 241))
-        self.groupBox_5.setObjectName("groupBox_5")
+        self.gr_axis = QtWidgets.QGroupBox(self.centralwidget)
+        self.gr_axis.setGeometry(QtCore.QRect(230, 140, 671, 241))
+        self.gr_axis.setObjectName("gr_axis")
+        self.xaxis = PlotWidget(self.gr_axis)
+        self.xaxis.setGeometry(QtCore.QRect(10, 20, 151, 211))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(
+            self.xaxis.sizePolicy().hasHeightForWidth())
+        self.xaxis.setSizePolicy(sizePolicy)
+        self.xaxis.setObjectName("xaxis")
+        self.yaxis = PlotWidget(self.gr_axis)
+        self.yaxis.setGeometry(QtCore.QRect(170, 20, 151, 211))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(
+            self.yaxis.sizePolicy().hasHeightForWidth())
+        self.yaxis.setSizePolicy(sizePolicy)
+        self.yaxis.setObjectName("yaxis")
+        self.xaxis_1 = PlotWidget(self.gr_axis)
+        self.xaxis_1.setGeometry(QtCore.QRect(350, 20, 151, 211))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(
+            self.xaxis_1.sizePolicy().hasHeightForWidth())
+        self.xaxis_1.setSizePolicy(sizePolicy)
+        self.xaxis_1.setObjectName("xaxis_1")
+        self.yaxis_1 = PlotWidget(self.gr_axis)
+        self.yaxis_1.setGeometry(QtCore.QRect(510, 20, 151, 211))
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(
+            self.yaxis_1.sizePolicy().hasHeightForWidth())
+        self.yaxis_1.setSizePolicy(sizePolicy)
+        self.yaxis_1.setObjectName("yaxis_1")
         self.groupBox_6 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_6.setGeometry(QtCore.QRect(20, 390, 881, 301))
         self.groupBox_6.setObjectName("groupBox_6")
@@ -135,18 +183,21 @@ class Ui_MK1(object):
         self.label_5.setObjectName("label_5")
         self.controlmode_label = QtWidgets.QLabel(self.groupBox_7)
         self.controlmode_label.setGeometry(QtCore.QRect(50, 20, 47, 21))
+        self.controlmode_label.setText("")
         self.controlmode_label.setObjectName("controlmode_label")
         self.groupBox_2.raise_()
         self.groupBox.raise_()
         self.groupBox_3.raise_()
         self.groupBox_4.raise_()
-        self.groupBox_5.raise_()
+        self.gr_axis.raise_()
         self.groupBox_6.raise_()
         self.groupBox_7.raise_()
         MK1.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MK1)
         self.statusbar.setObjectName("statusbar")
         MK1.setStatusBar(self.statusbar)
+
+        self.retranslateUi(MK1)
 
         # event connect button
         self.connect.clicked.connect(self.connectbtn)
@@ -156,12 +207,39 @@ class Ui_MK1(object):
         self.stop.clicked.connect(self.stop_mode)
         self.manual.clicked.connect(self.manual_mode)
 
+        # addplot
+        # xaxis
+        self.xaxis.setBackground('w')
+        self.xaxis.showGrid(x=True, y=True)
+        self.xaxis.setXRange(X_min, X_max, padding=0)
+        self.xaxis.setYRange(Y_min, Y_max, padding=0)
+        self.xaxis.setMouseEnabled(x=False, y=False)
+        # yaxis
+        self.yaxis.setBackground('w')
+        self.yaxis.showGrid(x=True, y=True)
+        self.yaxis.setXRange(X_min, X_max, padding=0)
+        self.yaxis.setYRange(Y_min, Y_max, padding=0)
+        self.yaxis.setMouseEnabled(x=False, y=False)
+        # xaxis_1
+        self.xaxis_1.setBackground('w')
+        self.xaxis_1.showGrid(x=True, y=True)
+        self.xaxis_1.setXRange(X_min, X_max, padding=0)
+        self.xaxis_1.setYRange(Y_min, Y_max, padding=0)
+        self.xaxis_1.setMouseEnabled(x=False, y=False)
+        # yaxis_1
+        self.yaxis_1.setBackground('w')
+        self.yaxis_1.showGrid(x=True, y=True)
+        self.yaxis_1.setXRange(X_min, X_max, padding=0)
+        self.yaxis_1.setYRange(Y_min, Y_max, padding=0)
+        self.yaxis_1.setMouseEnabled(x=False, y=False)
+        pen = pg.mkPen(color=(0, 0, 0))
+
         # startup
         self.stop.setEnabled(False)
+        self.connect.setStyleSheet('QPushButton {color: green;}')
+        self.connect.setText('CONNECT')
+        # self.main_process()
 
-        # addplot
-
-        self.retranslateUi(MK1)
         QtCore.QMetaObject.connectSlotsByName(MK1)
 
     def retranslateUi(self, MK1):
@@ -179,8 +257,7 @@ class Ui_MK1(object):
         self.COM.setItemText(7, _translate("MK1", "COM8"))
         self.COM.setItemText(8, _translate("MK1", "COM9"))
         self.COM.setItemText(9, _translate("MK1", "COM10"))
-        self.connect.setStyleSheet('QPushButton {color: green;}')
-        self.connect.setText(_translate("MK1", "CONNECT"))
+        self.connect.setText(_translate("MK1", "DISCONNECT"))
         self.label.setText(_translate("MK1", "COM:"))
         self.groupBox_2.setTitle(_translate("MK1", "Joystick"))
         self.label_2.setText(_translate("MK1", "Device:"))
@@ -196,11 +273,10 @@ class Ui_MK1(object):
                                            "p, li { white-space: pre-wrap; }\n"
                                            "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
                                            "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
-        self.groupBox_5.setTitle(_translate("MK1", "Axis"))
+        self.gr_axis.setTitle(_translate("MK1", "Axis"))
         self.groupBox_6.setTitle(_translate("MK1", "Analysis"))
         self.groupBox_7.setTitle(_translate("MK1", "Status"))
         self.label_5.setText(_translate("MK1", "Mode:"))
-        self.controlmode_label.setText("Stop")
 
     def connectbtn(self):
         global comconnect
@@ -255,6 +331,15 @@ class Ui_MK1(object):
             self.stop.setEnabled(True)
             self.auto_2.setEnabled(False)
             self.manual.setEnabled(True)
+
+    def main_process(self):
+        global lastcontrol
+        global control
+        self.threads = []
+        while(1):
+            if (control != lastcontrol):
+                lastcontrol = control
+                self.re_se_data.append('LA: ' + lastcontrol)
 
 
 if __name__ == "__main__":
