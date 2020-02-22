@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MK1.ui'
+# Form implementation generated from reading ui file '.\GUI\MK1.ui'
 #
 # Created by: PyQt5 UI code generator 5.13.0
 #
@@ -9,16 +9,14 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-NameCOM=[]
-transmit=[]
-comconnect=False
 
 class Ui_MK1(object):
     def setupUi(self, MK1):
         MK1.setObjectName("MK1")
         MK1.setEnabled(True)
         MK1.resize(1280, 720)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MK1.sizePolicy().hasHeightForWidth())
@@ -26,7 +24,8 @@ class Ui_MK1(object):
         MK1.setMinimumSize(QtCore.QSize(1280, 720))
         MK1.setMaximumSize(QtCore.QSize(1280, 720))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("C:/Users/ASUS/Pictures/82362862_762415024581207_8972626692153540608_n.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(
+            "C:/Users/ASUS/Pictures/82362862_762415024581207_8972626692153540608_n.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MK1.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MK1)
         self.centralwidget.setObjectName("centralwidget")
@@ -62,10 +61,6 @@ class Ui_MK1(object):
         self.label_3 = QtWidgets.QLabel(self.groupBox_2)
         self.label_3.setGeometry(QtCore.QRect(20, 40, 47, 16))
         self.label_3.setObjectName("label_3")
-        self.name_device = QtWidgets.QLabel(self.groupBox_2)
-        self.name_device.setGeometry(QtCore.QRect(60, 20, 601, 16))
-        self.name_device.setText("")
-        self.name_device.setObjectName("name_device")
         self.ID_device = QtWidgets.QLabel(self.groupBox_2)
         self.ID_device.setGeometry(QtCore.QRect(60, 40, 601, 16))
         self.ID_device.setText("")
@@ -77,6 +72,9 @@ class Ui_MK1(object):
         self.SS_device.setGeometry(QtCore.QRect(60, 60, 601, 16))
         self.SS_device.setText("")
         self.SS_device.setObjectName("SS_device")
+        self.device = QtWidgets.QComboBox(self.groupBox_2)
+        self.device.setGeometry(QtCore.QRect(60, 20, 601, 22))
+        self.device.setObjectName("device")
         self.groupBox_3 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_3.setGeometry(QtCore.QRect(20, 140, 201, 241))
         self.groupBox_3.setObjectName("groupBox_3")
@@ -95,10 +93,12 @@ class Ui_MK1(object):
         self.re_se_data = QtWidgets.QTextBrowser(self.groupBox_4)
         self.re_se_data.setEnabled(True)
         self.re_se_data.setGeometry(QtCore.QRect(10, 20, 331, 331))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.re_se_data.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.re_se_data.sizePolicy().hasHeightForWidth())
         self.re_se_data.setSizePolicy(sizePolicy)
         self.re_se_data.setObjectName("re_se_data")
         self.groupBox_5 = QtWidgets.QGroupBox(self.centralwidget)
@@ -110,6 +110,13 @@ class Ui_MK1(object):
         self.groupBox_7 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_7.setGeometry(QtCore.QRect(910, 390, 351, 301))
         self.groupBox_7.setObjectName("groupBox_7")
+        self.label_5 = QtWidgets.QLabel(self.groupBox_7)
+        self.label_5.setGeometry(QtCore.QRect(10, 20, 31, 21))
+        self.label_5.setObjectName("label_5")
+        self.controlmode_label = QtWidgets.QLabel(self.groupBox_7)
+        self.controlmode_label.setGeometry(QtCore.QRect(50, 20, 47, 21))
+        self.controlmode_label.setText("")
+        self.controlmode_label.setObjectName("controlmode_label")
         self.groupBox_2.raise_()
         self.groupBox.raise_()
         self.groupBox_3.raise_()
@@ -121,8 +128,6 @@ class Ui_MK1(object):
         self.statusbar = QtWidgets.QStatusBar(MK1)
         self.statusbar.setObjectName("statusbar")
         MK1.setStatusBar(self.statusbar)
-
-        self.connect.clicked.connect(self.connectbtn)
 
         self.retranslateUi(MK1)
         QtCore.QMetaObject.connectSlotsByName(MK1)
@@ -142,8 +147,7 @@ class Ui_MK1(object):
         self.COM.setItemText(7, _translate("MK1", "COM8"))
         self.COM.setItemText(8, _translate("MK1", "COM9"))
         self.COM.setItemText(9, _translate("MK1", "COM10"))
-        self.connect.setStyleSheet('QPushButton {color: green;}')
-        self.connect.setText(_translate("MK1", "CONNECT"))
+        self.connect.setText(_translate("MK1", "DISCONNECT"))
         self.label.setText(_translate("MK1", "COM:"))
         self.groupBox_2.setTitle(_translate("MK1", "Joystick"))
         self.label_2.setText(_translate("MK1", "Device:"))
@@ -155,38 +159,18 @@ class Ui_MK1(object):
         self.stop.setText(_translate("MK1", "STOP"))
         self.groupBox_4.setTitle(_translate("MK1", "Received/Send data"))
         self.re_se_data.setHtml(_translate("MK1", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
+                                           "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                           "p, li { white-space: pre-wrap; }\n"
+                                           "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
+                                           "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
         self.groupBox_5.setTitle(_translate("MK1", "Axis"))
         self.groupBox_6.setTitle(_translate("MK1", "Analysis"))
         self.groupBox_7.setTitle(_translate("MK1", "Status"))
+        self.label_5.setText(_translate("MK1", "Mode:"))
 
-    def connectbtn(self):
-        global comconnect
-        NameCOM=self.COM.currentText()
-        try:
-            transmit=serial.Serial(NameCOM,115200,timeout=2.5)
-            if(comconnect==False):
-                self.COM.setEnabled(False)
-                self.connect.setText('DISCONNECT')
-                self.connect.setStyleSheet('QPushButton {color: red;}')
-                self.re_se_data.append('Serial port ' + NameCOM + ' opened')
-                comconnect=True
-            else:
-                self.COM.setEnabled(True)
-                transmit.close()
-                self.connect.setText('CONNECT')
-                self.connect.setStyleSheet('QPushButton {color: green;}')
-                self.re_se_data.append('Serial port ' + NameCOM + ' closed')
-                comconnect=False
-        except IOError:
-            self.re_se_data.append('Serial port ' + NameCOM + ' opening error')
-            
+
 if __name__ == "__main__":
     import sys
-    import serial
     app = QtWidgets.QApplication(sys.argv)
     MK1 = QtWidgets.QMainWindow()
     ui = Ui_MK1()
