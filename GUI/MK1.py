@@ -18,6 +18,8 @@ import time
 import serial
 import math
 
+import threading
+
 # define number
 X_min = 0
 X_max = 15
@@ -36,6 +38,14 @@ transmit = []
 comconnect = False
 control = mode.stop
 lastcontrol = mode.stop
+
+
+class ComboBox(QtWidgets.QComboBox):
+    popupAboutToBeShown = QtCore.pyqtSignal()
+
+    def showPopup(self):
+        self.popupAboutToBeShown.emit()
+        super(ComboBox, self).showPopup()
 
 
 class Ui_MK1(object):
@@ -100,8 +110,8 @@ class Ui_MK1(object):
         self.SS_device.setGeometry(QtCore.QRect(60, 60, 601, 16))
         self.SS_device.setText("")
         self.SS_device.setObjectName("SS_device")
-        self.device = QtWidgets.QComboBox(self.groupBox_2)
-        self.device.setGeometry(QtCore.QRect(60, 20, 601, 22))
+        self.device = ComboBox(self.groupBox_2)
+        self.device.setGeometry(QtCore.QRect(60, 19, 601, 21))
         self.device.setObjectName("device")
         self.groupBox_3 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_3.setGeometry(QtCore.QRect(20, 140, 201, 241))
@@ -198,6 +208,9 @@ class Ui_MK1(object):
         MK1.setStatusBar(self.statusbar)
 
         self.retranslateUi(MK1)
+
+        # event device combo box
+        self.device.popupAboutToBeShown.connect(self.getjoystick)
 
         # event connect button
         self.connect.clicked.connect(self.connectbtn)
@@ -317,6 +330,15 @@ class Ui_MK1(object):
         control = mode.stop
         self.controlmode()
 
+    def getjoystick(self):
+        num_joy = pygame.joystick.get_count()
+        if (num_joy > 0):
+            self.device.clear()
+            for x in range(num_joy):
+                joystick_no = pygame.joystick.Joystick(x)
+                joystick_no.init()
+                self.device.addItem(joystick_no.get_name())
+
     def controlmode(self):
         global control
         if (control == mode.stop):
@@ -344,6 +366,7 @@ class Ui_MK1(object):
 
 if __name__ == "__main__":
     import sys
+    pygame.joystick.init()
     app = QtWidgets.QApplication(sys.argv)
     MK1 = QtWidgets.QMainWindow()
     ui = Ui_MK1()
