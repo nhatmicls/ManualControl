@@ -210,6 +210,7 @@ class Ui_MK1(object):
         self.retranslateUi(MK1)
 
         # event device combo box
+        self.device.currentIndexChanged.connect(self.choiceJoystick)
         self.device.popupAboutToBeShown.connect(self.getjoystick)
 
         # event connect button
@@ -329,6 +330,9 @@ class Ui_MK1(object):
         self.controlmode_label.setText("Stop")
         control = mode.stop
         self.controlmode()
+
+    def choiceJoystick(self):
+        print(self.device.currentIndex())
 
     def getjoystick(self):
         num_joy = pygame.joystick.get_count()
