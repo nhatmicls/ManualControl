@@ -256,7 +256,7 @@ class Ui_MK1(object):
         self.y3 = list(range(listrange))
         self.y4 = list(range(listrange))
         self.timer=QtCore.QTimer()
-        self.timer.setInterval(16)
+        self.timer.setInterval(100)
         self.timer.timeout.connect(self.refreshUI)
         self.timer.start()
         pen = pg.mkPen(color=(0, 0, 0))
@@ -319,12 +319,13 @@ class Ui_MK1(object):
             self.y2.append(axis[1])
             self.data_line1.setData(self.x, self.y1)
             self.data_line2.setData(self.x, self.y2)
-            if(comconnect==True):
-                self.transmit.write(datasendalpha.encode())
         elif(control==mode.stop):
-            pass
+            datasendalpha="STOP"
         else:
-            pass
+            datasendalpha="AUTO"
+        if(comconnect==True):
+            self.transmit.write(datasendalpha.encode())
+            print(datasendalpha)
 
     def connectbtn(self):
         global comconnect
@@ -351,18 +352,21 @@ class Ui_MK1(object):
         global control
         self.controlmode_label.setText("Manual")
         control = mode.manual
+        self.timer.setInterval(16)
         self.controlmode()
 
     def auto_mode(self):
         global control
         self.controlmode_label.setText("Auto")
         control = mode.auto
+        self.timer.setInterval(100)
         self.controlmode()
 
     def stop_mode(self):
         global control
         self.controlmode_label.setText("Stop")
         control = mode.stop
+        self.timer.setInterval(100)
         self.controlmode()
 
     def choiceJoystick(self):
