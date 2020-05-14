@@ -10,6 +10,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
+from random import randint
+
 
 from enum import Enum
 
@@ -17,28 +19,34 @@ import pygame
 import time
 import serial
 import math
+import sys
 
 import threading
 
 # define number
-X_min = 0
-X_max = 15
-Y_min = 0
-Y_max = 15
-
+listrange = 63
+Y_min = -110
+Y_max = 110
+Y1_min = 110
+Y1_max = -110
+ippppp = 0
 
 class mode(Enum):
     auto = 1
     manual = 2
     stop = 0
 
-
+joystick_no = []
+joystick_choice = 0
+choiceJoystickstatus = False
+Joystickconect = False
 NameCOM = []
-transmit = []
+button=[0,0,0,0,0]
+axis=[0,0,0]
+datasendalpha=[]
 comconnect = False
 control = mode.stop
 lastcontrol = mode.stop
-
 
 class ComboBox(QtWidgets.QComboBox):
     popupAboutToBeShown = QtCore.pyqtSignal()
@@ -46,7 +54,6 @@ class ComboBox(QtWidgets.QComboBox):
     def showPopup(self):
         self.popupAboutToBeShown.emit()
         super(ComboBox, self).showPopup()
-
 
 class Ui_MK1(object):
     def setupUi(self, MK1):
@@ -225,28 +232,36 @@ class Ui_MK1(object):
         # xaxis
         self.xaxis.setBackground('w')
         self.xaxis.showGrid(x=True, y=True)
-        self.xaxis.setXRange(X_min, X_max, padding=0)
         self.xaxis.setYRange(Y_min, Y_max, padding=0)
         self.xaxis.setMouseEnabled(x=False, y=False)
         # yaxis
         self.yaxis.setBackground('w')
         self.yaxis.showGrid(x=True, y=True)
-        self.yaxis.setXRange(X_min, X_max, padding=0)
-        self.yaxis.setYRange(Y_min, Y_max, padding=0)
+        self.yaxis.setYRange(Y1_min, Y1_max, padding=0)
         self.yaxis.setMouseEnabled(x=False, y=False)
         # xaxis_1
         self.xaxis_1.setBackground('w')
         self.xaxis_1.showGrid(x=True, y=True)
-        self.xaxis_1.setXRange(X_min, X_max, padding=0)
         self.xaxis_1.setYRange(Y_min, Y_max, padding=0)
         self.xaxis_1.setMouseEnabled(x=False, y=False)
         # yaxis_1
         self.yaxis_1.setBackground('w')
         self.yaxis_1.showGrid(x=True, y=True)
-        self.yaxis_1.setXRange(X_min, X_max, padding=0)
         self.yaxis_1.setYRange(Y_min, Y_max, padding=0)
         self.yaxis_1.setMouseEnabled(x=False, y=False)
+        #updateGUItimer
+        self.x = list(range(listrange))
+        self.y1 = list(range(listrange))
+        self.y2 = list(range(listrange))
+        self.y3 = list(range(listrange))
+        self.y4 = list(range(listrange))
+        self.timer=QtCore.QTimer()
+        self.timer.setInterval(16)
+        self.timer.timeout.connect(self.refreshUI)
+        self.timer.start()
         pen = pg.mkPen(color=(0, 0, 0))
+        self.data_line1=self.xaxis.plot(self.x, self.y1, pen=pen)
+        self.data_line2=self.yaxis.plot(self.x, self.y2, pen=pen)
 
         # startup
         self.stop.setEnabled(False)
@@ -291,12 +306,31 @@ class Ui_MK1(object):
         self.groupBox_6.setTitle(_translate("MK1", "Analysis"))
         self.groupBox_7.setTitle(_translate("MK1", "Status"))
         self.label_5.setText(_translate("MK1", "Mode:"))
+        self.controlmode_label.setText(_translate("MK1","Stop"))
+
+    def refreshUI(self):
+        global datasendalpha
+        if(control==mode.manual):
+            self.x = self.x[1:]
+            self.x.append(self.x[-1] + 1)
+            self.y1= self.y1[1:]
+            self.y2= self.y2[1:]
+            self.y1.append(axis[0])
+            self.y2.append(axis[1])
+            self.data_line1.setData(self.x, self.y1)
+            self.data_line2.setData(self.x, self.y2)
+            if(comconnect==True):
+                self.transmit.write(datasendalpha.encode())
+        elif(control==mode.stop):
+            pass
+        else:
+            pass
 
     def connectbtn(self):
         global comconnect
         NameCOM = self.COM.currentText()
         try:
-            transmit = serial.Serial(NameCOM, 115200, timeout=2.5)
+            self.transmit = serial.Serial(NameCOM, 115200, timeout=2.5)
             if(comconnect == False):
                 self.COM.setEnabled(False)
                 self.connect.setText('DISCONNECT')
@@ -305,7 +339,7 @@ class Ui_MK1(object):
                 comconnect = True
             else:
                 self.COM.setEnabled(True)
-                transmit.close()
+                self.transmit.close()
                 self.connect.setText('CONNECT')
                 self.connect.setStyleSheet('QPushButton {color: green;}')
                 self.re_se_data.append('Serial port ' + NameCOM + ' closed')
@@ -332,9 +366,13 @@ class Ui_MK1(object):
         self.controlmode()
 
     def choiceJoystick(self):
+        global joystick_choice,choiceJoystickstatus,Joystickconect
         print(self.device.currentIndex())
+        choiceJoystickstatus=True
+        Joystickconect=True
 
     def getjoystick(self):
+        global joystick_no
         num_joy = pygame.joystick.get_count()
         if (num_joy > 0):
             self.device.clear()
@@ -342,6 +380,7 @@ class Ui_MK1(object):
                 joystick_no = pygame.joystick.Joystick(x)
                 joystick_no.init()
                 self.device.addItem(joystick_no.get_name())
+                self.ID_device.setText(str(joystick_no.get_id()))
 
     def controlmode(self):
         global control
@@ -358,22 +397,68 @@ class Ui_MK1(object):
             self.auto_2.setEnabled(False)
             self.manual.setEnabled(True)
 
-    def main_process(self):
-        global lastcontrol
-        global control
-        self.threads = []
-        while(1):
-            if (control != lastcontrol):
-                lastcontrol = control
-                self.re_se_data.append('LA: ' + lastcontrol)
+def backgroundProcess():
+    global control,axis,button,datasendalpha,choiceJoystickstatus,joystick_no,joystick_choice,Joystickconect
+    cache = []
+    datasend=[]
+    while(1):
+        if(choiceJoystickstatus==True):
+            choiceJoystickstatus=False
+            joystick_no=pygame.joystick.Joystick(joystick_choice)
+            joystick_no.init()
+        pygame.event.pump()
+        if(control==mode.manual and Joystickconect==True):
+            for i in range(2):
+                axis[i]=round(joystick_no.get_axis(i)*100,0)
+                axis[i]=int(axis[i])
+                if(axis[i]==0):
+                    axis[i]=1
+                if(axis[i]<0):
+                    cacheaxis=abs(axis[i])
+                    cachedic=1
+                else:
+                    cacheaxis=axis[i]
+                    cachedic=0
 
+                if(cacheaxis<10):
+                    cache+="00"
+                elif (cacheaxis<100):
+                    cache+="0"
 
-if __name__ == "__main__":
-    import sys
-    pygame.joystick.init()
+                cache+=str(cacheaxis)
+                cache+=str(cachedic)
+            
+            for i in range(5):
+                button[i]=joystick_no.get_button(i)
+
+            #cache+="."
+            cache+=str(len(cache)-1)
+            cache+="]"
+            datasend=''.join(cache)
+            #cache=datasend.encode()
+            #print(type(datasend))
+            print("{}".format(datasend))
+            datasendalpha=datasend
+            #transmit.write(datasend.encode())
+            cache=[]
+            cache+="["
+            datasend=[]
+        time.sleep(0.016)
+        
+def UIbuild():
     app = QtWidgets.QApplication(sys.argv)
     MK1 = QtWidgets.QMainWindow()
     ui = Ui_MK1()
     ui.setupUi(MK1)
     MK1.show()
     sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    pygame.display.init()
+    pygame.joystick.init()
+    t1=threading.Thread(target=backgroundProcess)
+    t2=threading.Thread(target=UIbuild)
+    t1.daemon=True
+    t1.start()
+    t2.start()
+    

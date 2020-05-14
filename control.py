@@ -19,7 +19,7 @@ def main():
 
     controljoy=pygame.joystick.Joystick(0)
     controljoy.init()
-    #print(controljoy.get_init())
+    print(controljoy.get_init())
     print("ID: ",controljoy.get_id())
     print("Name device: ",controljoy.get_name())
     print("Number of axis: ",controljoy.get_numaxes())
