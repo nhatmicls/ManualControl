@@ -331,9 +331,9 @@ class Ui_MK1(object):
         global comconnect
         NameCOM = self.COM.currentText()
         try:
-            self.transmit = serial.Serial(NameCOM, 115200, timeout=2.5)
             if(comconnect == False):
                 self.COM.setEnabled(False)
+                self.transmit = serial.Serial(NameCOM, 115200, timeout=2.5)
                 self.connect.setText('DISCONNECT')
                 self.connect.setStyleSheet('QPushButton {color: red;}')
                 self.re_se_data.append('Serial port ' + NameCOM + ' opened')
@@ -346,7 +346,10 @@ class Ui_MK1(object):
                 self.re_se_data.append('Serial port ' + NameCOM + ' closed')
                 comconnect = False
         except IOError:
-            self.re_se_data.append('Serial port ' + NameCOM + ' opening error')
+            if(comconnect == False):
+                self.re_se_data.append('Serial port ' + NameCOM + ' opening error')
+            else:
+                self.re_se_data.append('Serial port ' + NameCOM + ' closing error')
 
     def manual_mode(self):
         global control
