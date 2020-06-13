@@ -43,6 +43,7 @@ NameCOM = []
 button=[0,0,0,0,0]
 axis=[0,0,0]
 datasendalpha=[]
+transmit=[]
 comconnect = False
 control = mode.stop
 lastcontrol = mode.stop
@@ -496,11 +497,11 @@ class Ui_MK1(object):
         else:
             datasendalpha="AUTO"
         if(comconnect==True):
-            self.transmit.write(datasendalpha.encode())
+            transmit.write(datasendalpha.encode())
             print(datasendalpha)
 
     def connectbtn(self):
-        global comconnect
+        global comconnect,transmit
         NameCOM = self.COM.currentText()
         try:
             if(comconnect == False):
@@ -512,7 +513,7 @@ class Ui_MK1(object):
                 comconnect = True
             else:
                 self.COM.setEnabled(True)
-                self.transmit.close()
+                transmit.close()
                 self.connect.setText('CONNECT')
                 self.connect.setStyleSheet('QPushButton {color: green;}')
                 self.re_se_data.append('Serial port ' + NameCOM + ' closed')
