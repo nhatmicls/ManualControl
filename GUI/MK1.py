@@ -332,8 +332,8 @@ class Ui_MK1(object):
         NameCOM = self.COM.currentText()
         try:
             if(comconnect == False):
-                self.COM.setEnabled(False)
                 self.transmit = serial.Serial(NameCOM, 115200, timeout=2.5)
+                self.COM.setEnabled(False)
                 self.connect.setText('DISCONNECT')
                 self.connect.setStyleSheet('QPushButton {color: red;}')
                 self.re_se_data.append('Serial port ' + NameCOM + ' opened')
@@ -409,37 +409,65 @@ def backgroundProcess():
     cache = []
     datasend=[]
     while(1):
+        cachedic=0
         if(choiceJoystickstatus==True):
             choiceJoystickstatus=False
             joystick_no=pygame.joystick.Joystick(joystick_choice)
             joystick_no.init()
         pygame.event.pump()
         if(control==mode.manual and Joystickconect==True):
+
+            x=round(joystick_no.get_axis(0)*100,0)
+            y=-round(joystick_no.get_axis(1)*100,0)
+            if(x!=0):
+                alpha=math.atan(y/x)
+                alpha*=(180/3.14)
+            else:
+                if(y>=0):
+                    alpha=90
+                elif(y<0):
+                    alpha=-90
+
+            if(abs(alpha)>60):
+                axis[0]=y
+                axis[1]=y
+            elif(abs(alpha)<=30):
+                axis[1]=x
+                axis[0]=-x
+            else:
+                if(x>0):
+                    axis[1]=y
+                    axis[0]=y*abs(alpha/70)
+                else:
+                    axis[1]=y*abs(alpha/70)
+                    axis[0]=y
+
             for i in range(2):
-                axis[i]=round(joystick_no.get_axis(i)*100,0)
-                axis[i]=int(axis[i])
-                if(axis[i]==0):
-                    axis[i]=1
-                if(axis[i]<0):
+                if(axis[i]<0 or axis[i]==-0):
                     cacheaxis=abs(axis[i])
-                    cachedic=1
+                    if (i==0):
+                        cachedic+=1
+                    else:
+                        cachedic+=2
                 else:
                     cacheaxis=axis[i]
-                    cachedic=0
 
                 if(cacheaxis<10):
                     cache+="00"
                 elif (cacheaxis<100):
                     cache+="0"
 
-                cache+=str(cacheaxis)
-                cache+=str(cachedic)
+                if(i==0):
+                    cache+=str(int(cacheaxis))
+                elif(i==1):
+                    cache+=str(int(cacheaxis))
+                    cache+=str(int(cachedic))
             
             for i in range(5):
                 button[i]=joystick_no.get_button(i)
 
-            #cache+="."
-            cache+=str(len(cache)-1)
+            # cache+="."
+            # cache+=str(len(cache)-1)
             cache+="]"
             datasend=''.join(cache)
             #cache=datasend.encode()
