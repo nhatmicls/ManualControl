@@ -829,7 +829,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>80</x>
-       <y>150</y>
+       <y>160</y>
        <width>160</width>
        <height>22</height>
       </rect>
@@ -861,7 +861,7 @@ p, li { white-space: pre-wrap; }
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>150</y>
+       <y>160</y>
        <width>61</width>
        <height>16</height>
       </rect>
@@ -881,6 +881,32 @@ p, li { white-space: pre-wrap; }
      </property>
      <property name="text">
       <string>Left Motor</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Rightpercent">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>160</y>
+       <width>47</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Leftpercent">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>190</y>
+       <width>47</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </widget>

@@ -6,12 +6,10 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
 from random import randint
-
 
 from enum import Enum
 
@@ -48,6 +46,7 @@ datasendalpha=[]
 comconnect = False
 control = mode.stop
 lastcontrol = mode.stop
+globaldebug=[0,0]
 
 class ComboBox(QtWidgets.QComboBox):
     popupAboutToBeShown = QtCore.pyqtSignal()
@@ -295,7 +294,7 @@ class Ui_MK1(object):
         self.getoldpid.setGeometry(QtCore.QRect(284, 120, 141, 31))
         self.getoldpid.setObjectName("getoldpid")
         self.rightspeed = QtWidgets.QSlider(self.tunepid)
-        self.rightspeed.setGeometry(QtCore.QRect(80, 150, 160, 22))
+        self.rightspeed.setGeometry(QtCore.QRect(80, 160, 160, 22))
         self.rightspeed.setMaximum(100)
         self.rightspeed.setOrientation(QtCore.Qt.Horizontal)
         self.rightspeed.setObjectName("rightspeed")
@@ -305,11 +304,19 @@ class Ui_MK1(object):
         self.leftspeed.setOrientation(QtCore.Qt.Horizontal)
         self.leftspeed.setObjectName("leftspeed")
         self.label_30 = QtWidgets.QLabel(self.tunepid)
-        self.label_30.setGeometry(QtCore.QRect(10, 150, 61, 16))
+        self.label_30.setGeometry(QtCore.QRect(10, 160, 61, 16))
         self.label_30.setObjectName("label_30")
         self.label_31 = QtWidgets.QLabel(self.tunepid)
         self.label_31.setGeometry(QtCore.QRect(10, 190, 61, 20))
         self.label_31.setObjectName("label_31")
+        self.Rightpercent = QtWidgets.QLabel(self.tunepid)
+        self.Rightpercent.setGeometry(QtCore.QRect(260, 160, 47, 21))
+        self.Rightpercent.setText("")
+        self.Rightpercent.setObjectName("Rightpercent")
+        self.Leftpercent = QtWidgets.QLabel(self.tunepid)
+        self.Leftpercent.setGeometry(QtCore.QRect(260, 190, 47, 21))
+        self.Leftpercent.setText("")
+        self.Leftpercent.setObjectName("Leftpercent")
         self.groupBox_7 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_7.setGeometry(QtCore.QRect(360, 360, 301, 331))
         self.groupBox_7.setObjectName("groupBox_7")
@@ -347,8 +354,14 @@ class Ui_MK1(object):
         self.manual.clicked.connect(self.manual_mode)
         self.debug.clicked.connect(self.debug_mode)
 
-        #event pusshpid button
+        # event pusshpid button
         self.pushpid.clicked.connect(self.sendpid)
+        self.pushpid_1.clicked.connect(self.sendpid)
+        self.pushpid_2.clicked.connect(self.sendpid)
+
+        # event change value debug
+        self.rightspeed.valueChanged.connect(self.changevalue)
+        self.leftspeed.valueChanged.connect(self.changevalue)
 
         # addplot
         # xaxis
@@ -465,13 +478,17 @@ class Ui_MK1(object):
 
     def refreshUI(self):
         global datasendalpha
-        if(control==mode.manual):
+        if(control==mode.manual or control==mode.debug):
             self.x = self.x[1:]
             self.x.append(self.x[-1] + 1)
             self.y1= self.y1[1:]
             self.y2= self.y2[1:]
-            self.y1.append(axis[0])
-            self.y2.append(axis[1])
+            if(control==mode.manual):
+                self.y1.append(axis[0])
+                self.y2.append(axis[1])
+            elif(control==mode.debug):
+                self.y1.append(globaldebug[0])
+                self.y2.append(globaldebug[1])
             self.data_line1.setData(self.x, self.y1)
             self.data_line2.setData(self.x, self.y2)
         elif(control==mode.stop):
@@ -507,7 +524,7 @@ class Ui_MK1(object):
                 self.re_se_data.append('Serial port ' + NameCOM + ' closing error')
 
     def manual_mode(self):
-        global control
+        global control                          
         self.controlmode_label.setText("Manual")
         control = mode.manual
         self.timer.setInterval(16)
@@ -531,7 +548,7 @@ class Ui_MK1(object):
         global control
         self.controlmode_label.setText("Debug")
         control = mode.debug
-        self.timer.setInterval(100)
+        self.timer.setInterval(16)
         self.controlmode()
 
     def choiceJoystick(self):
@@ -574,6 +591,11 @@ class Ui_MK1(object):
             self.manual.setEnabled(True)
             self.debug.setEnabled(True)
 
+    def changevalue(self):
+        global globaldebug
+        globaldebug[0]=int(self.leftspeed.value())
+        globaldebug[1]=int(self.rightspeed.value())
+
     def sendpid(self):
         pass
 
@@ -588,32 +610,37 @@ def backgroundProcess():
             joystick_no=pygame.joystick.Joystick(joystick_choice)
             joystick_no.init()
         pygame.event.pump()
-        if(control==mode.manual and Joystickconect==True):
-
-            x=round(joystick_no.get_axis(0)*100,0)
-            y=-round(joystick_no.get_axis(1)*100,0)
-            if(x!=0):
-                alpha=math.atan(y/x)
-                alpha*=(180/3.14)
-            else:
-                if(y>=0):
-                    alpha=90
-                elif(y<0):
-                    alpha=-90
-
-            if(abs(alpha)>60):
-                axis[0]=y
-                axis[1]=y
-            elif(abs(alpha)<=30):
-                axis[1]=x
-                axis[0]=-x
-            else:
-                if(x>0):
-                    axis[1]=y
-                    axis[0]=y*abs(alpha/70)
+        if((control==mode.manual  and Joystickconect==True) or control==mode.debug):
+            if(control==mode.manual):
+                x=round(joystick_no.get_axis(0)*100,0)
+                y=-round(joystick_no.get_axis(1)*100,0)
+                if(x!=0):
+                    alpha=math.atan(y/x)
+                    alpha*=(180/3.14)
                 else:
-                    axis[1]=y*abs(alpha/70)
+                    if(y>=0):
+                        alpha=90
+                    elif(y<0):
+                        alpha=-90
+
+                if(abs(alpha)>60):
                     axis[0]=y
+                    axis[1]=y
+                elif(abs(alpha)<=30):
+                    axis[1]=x
+                    axis[0]=-x
+                else:
+                    if(x>0):
+                        axis[1]=y
+                        axis[0]=y*abs(alpha/70)
+                    else:
+                        axis[1]=y*abs(alpha/70)
+                        axis[0]=y
+                for i in range(5):
+                    button[i]=joystick_no.get_button(i)
+            else:
+                axis[0]=globaldebug[0]
+                axis[1]=globaldebug[1]
 
             for i in range(2):
                 if(axis[i]<0 or axis[i]==-0):
@@ -635,16 +662,11 @@ def backgroundProcess():
                 elif(i==1):
                     cache+=str(int(cacheaxis))
                     cache+=str(int(cachedic))
-            
-            for i in range(5):
-                button[i]=joystick_no.get_button(i)
 
             # cache+="."
             # cache+=str(len(cache)-1)
             cache+="]"
             datasend=''.join(cache)
-            #cache=datasend.encode()
-            #print(type(datasend))
             print("{}".format(datasend))
             datasendalpha=datasend
             #transmit.write(datasend.encode())
