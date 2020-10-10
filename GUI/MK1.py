@@ -497,7 +497,7 @@ class Ui_MK1(object):
         else:
             datasendalpha="AUTO"
         if(comconnect==True):
-            transmit.write(datasendalpha.encode())
+            self.transmit.write(datasendalpha.encode())
             print(datasendalpha)
 
     def connectbtn(self):
@@ -513,7 +513,7 @@ class Ui_MK1(object):
                 comconnect = True
             else:
                 self.COM.setEnabled(True)
-                transmit.close()
+                self.transmit.close()
                 self.connect.setText('CONNECT')
                 self.connect.setStyleSheet('QPushButton {color: green;}')
                 self.re_se_data.append('Serial port ' + NameCOM + ' closed')
@@ -665,7 +665,7 @@ def backgroundProcess():
                     cache+=str(int(cachedic))
 
             # cache+="."
-            # cache+=str(len(cache)-1)
+            cache+=str(len(cache))
             cache+="]"
             datasend=''.join(cache)
             print("{}".format(datasend))
