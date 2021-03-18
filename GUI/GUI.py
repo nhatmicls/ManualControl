@@ -15,6 +15,7 @@ import threading
 
 import os
 from MK1 import *
+from mavlink_cloning import *
 
 # define number
 listrange = 63
@@ -48,7 +49,7 @@ globaldebug=[0,0]
 PIDdata=[0,0,0,0,0,0,0,0,0]
 
 class GUI_Init(Ui_MK1):
-    def __init__(self):
+    def __init__(self, ID, name):
         super(Ui_MK1,self).__init__()
         self.setupUi()
         self.setupUi1()
@@ -60,6 +61,9 @@ class GUI_Init(Ui_MK1):
 
         # event connect button
         self.connect.clicked.connect(self.connectbtn)
+
+        #event send button
+        self.send.clicked.connect(self.senddata)
 
         # event auto/manual/stop button
         self.auto_2.clicked.connect(self.auto_mode)
@@ -107,6 +111,7 @@ class GUI_Init(Ui_MK1):
         self.general_2.showGrid(x=True, y=True)
         self.general_2.setYRange(Y_min, Y_max, padding=0)
         self.general_2.setMouseEnabled(x=False, y=False)
+
         #updateGUItimer
         self.x = list(range(listrange))
         self.y1 = list(range(listrange))
@@ -151,8 +156,8 @@ class GUI_Init(Ui_MK1):
             datasendalpha="STOP"
         else:
             datasendalpha="AUTO"
-        if(comconnect==True):
-            self.transmit.write(datasendalpha.encode())
+        if(comconnect==True and (control==mode.stop or control==mode.auto)):
+            # self.transmit.write(datasendalpha.encode())
             print(datasendalpha)
 
     def connectbtn(self):
@@ -160,7 +165,10 @@ class GUI_Init(Ui_MK1):
         NameCOM = self.COM.currentText()
         try:
             if(comconnect == False):
-                self.transmit = serial.Serial(NameCOM, 115200, timeout=2.5)
+                #for windows
+                #self.transmit = serial.Serial(NameCOM, 115200, timeout=2.5)
+                #for ubuntu
+                self.transmit = serial.Serial("/dev/pts/4",115200,timeout=2.5)
                 self.COM.setEnabled(False)
                 self.connect.setText('DISCONNECT')
                 self.connect.setStyleSheet('QPushButton {color: red;}')
@@ -174,10 +182,14 @@ class GUI_Init(Ui_MK1):
                 self.re_se_data.append('Serial port ' + NameCOM + ' closed')
                 comconnect = False
         except IOError:
+            data="<span style=\"color:#ff0000;\" >"
+            data+=('Serial port ' + NameCOM);
             if(comconnect == False):
-                self.re_se_data.append('Serial port ' + NameCOM + ' opening error')
+                data+=" opening "
             else:
-                self.re_se_data.append('Serial port ' + NameCOM + ' closing error')
+                data+=" closing "
+            data+="error <\span>"
+            self.re_se_data.append(data)
 
     def manual_mode(self):
         global control                          
@@ -255,13 +267,34 @@ class GUI_Init(Ui_MK1):
     def sendpid(self):
         global PIDdata
 
+    def senddata(self):
+        data="<span style=\"color:#000000;\" >"
+        data+=(self.testsend.toPlainText())
+        data+=("</span>")
+        self.re_se_data.append(data)
+        self.testsend.clear()
+        if comconnect==True:
+            self.transmit.write(data.encode())
+        else:
+            self.re_se_data.append("<span style=\"color:#C0C0C0;\" > Comms isn't connect </span>")
+
     def getdata(self):
-        global dataread
-        print('Hello mother facker')
+        global dataread,transmit
+        bytetoread=[]
+        if comconnect == True:
+            bytetoread=self.transmit.inWaiting()
+            if bytetoread > 0:
+                data="<span style=\"color:#ff0000;\" >"
+                data+=(str(self.transmit.read(bytetoread),'utf-8'))
+                data+=("</span>")
+                data=data.replace("\n","")
+                self.re_se_data.append(data)
+        # print('Hello mother facker')
 
 class backgroundProcess():
-    def __init__(self):
-        pass
+    def __init__(self, ID, name):
+        super(backgroundProcess).__init__()
+        self.getdatafromJoystick()
 
     def getdatafromJoystick():
         global control,axis,button,datasendalpha,choiceJoystickstatus,joystick_no,joystick_choice,Joystickconect
@@ -341,7 +374,7 @@ class backgroundProcess():
 
 def UIbuild():
     app = QtWidgets.QApplication(sys.argv)
-    GUI = GUI_Init()
+    GUI = GUI_Init(1,"GUI_builder")
     GUI.show()
     sys.exit(app.exec_())
 
