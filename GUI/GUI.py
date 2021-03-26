@@ -10,12 +10,14 @@ import time
 import serial
 import math
 import sys
+import codecs
 
 import threading
-
 import os
+
 from MK1 import *
-from mavlink_cloning import *
+from mavlink_faking import *
+from database import *
 
 # define number
 listrange = 63
@@ -46,11 +48,10 @@ comconnect = False
 control = mode.stop
 lastcontrol = mode.stop
 globaldebug=[0,0]
-PIDdata=[0,0,0,0,0,0,0,0,0]
 
-class GUI_Init(Ui_MK1):
+class GUI_Init(Ui_MK1,messageProcess,processData):
     def __init__(self, ID, name):
-        super(Ui_MK1,self).__init__()
+        super(GUI_Init,self).__init__()
         self.setupUi()
         self.setupUi1()
 
@@ -79,6 +80,9 @@ class GUI_Init(Ui_MK1):
         # event change value debug
         self.rightspeed.valueChanged.connect(self.changevalue)
         self.leftspeed.valueChanged.connect(self.changevalue)
+
+        # event Enter for textbox "testsend"
+        self.testsend.installEventFilter(self)
 
         # addplot
         # xaxis
@@ -137,6 +141,13 @@ class GUI_Init(Ui_MK1):
         self.connect.setText('CONNECT')
         # self.main_process()
 
+    # event handle
+    def eventFilter(self,obj,event):
+        if event.type()==QtCore.QEvent.KeyPress and obj is self.testsend:
+            if event.key()==QtCore.Qt.Key_Return and self.testsend.hasFocus():
+                self.senddata()
+        return super().eventFilter(obj,event)
+
     def refreshUI(self):
         global datasendalpha
         if(control==mode.manual or control==mode.debug):
@@ -158,7 +169,8 @@ class GUI_Init(Ui_MK1):
             datasendalpha="AUTO"
         if(comconnect==True and (control==mode.stop or control==mode.auto)):
             # self.transmit.write(datasendalpha.encode())
-            print(datasendalpha)
+            # print(datasendalpha)
+            pass
 
     def connectbtn(self):
         global comconnect,transmit
@@ -166,9 +178,9 @@ class GUI_Init(Ui_MK1):
         try:
             if(comconnect == False):
                 #for windows
-                #self.transmit = serial.Serial(NameCOM, 115200, timeout=2.5)
+                self.transmit = serial.Serial(NameCOM, 115200, timeout=2.5)
                 #for ubuntu
-                self.transmit = serial.Serial("/dev/pts/4",115200,timeout=2.5)
+                # self.transmit = serial.Serial("/dev/pts/5",115200,timeout=2.5)
                 self.COM.setEnabled(False)
                 self.connect.setText('DISCONNECT')
                 self.connect.setStyleSheet('QPushButton {color: red;}')
@@ -265,16 +277,18 @@ class GUI_Init(Ui_MK1):
         globaldebug[1]=int(self.rightspeed.value())
 
     def sendpid(self):
-        global PIDdata
+        pass
 
     def senddata(self):
-        data="<span style=\"color:#000000;\" >"
-        data+=(self.testsend.toPlainText())
-        data+=("</span>")
-        self.re_se_data.append(data)
+        displaydata="<span style=\"color:#000000;\" >"
+        maindata=self.testsend.text()
+        displaydata+=maindata
+        displaydata+=("</span>")
+        self.re_se_data.append(displaydata)
         self.testsend.clear()
         if comconnect==True:
-            self.transmit.write(data.encode())
+            maindata+="\n"
+            self.transmit.write(maindata.encode())
         else:
             self.re_se_data.append("<span style=\"color:#C0C0C0;\" > Comms isn't connect </span>")
 
@@ -284,11 +298,17 @@ class GUI_Init(Ui_MK1):
         if comconnect == True:
             bytetoread=self.transmit.inWaiting()
             if bytetoread > 0:
-                data="<span style=\"color:#ff0000;\" >"
-                data+=(str(self.transmit.read(bytetoread),'utf-8'))
-                data+=("</span>")
-                data=data.replace("\n","")
-                self.re_se_data.append(data)
+                # maindata=str(self.transmit.read(bytetoread),'utf-8')
+                rawdata=self.transmit.read(bytetoread)
+                str_data=str(rawdata)
+                str_data=str_data.replace("\'","")
+                str_data=str_data.replace("b","")
+                self.messageDecoder(rawdata,len(rawdata))
+                displaydata="<span style=\"color:#ff0000;\" >"
+                displaydata+=str_data
+                displaydata+=("</span>")
+                self.re_se_data.append(displaydata)
+                # print(database_t.velocity.velocity1)
         # print('Hello mother facker')
 
 class backgroundProcess():
@@ -296,7 +316,7 @@ class backgroundProcess():
         super(backgroundProcess).__init__()
         self.getdatafromJoystick()
 
-    def getdatafromJoystick():
+    def getdatafromJoystick(self):
         global control,axis,button,datasendalpha,choiceJoystickstatus,joystick_no,joystick_choice,Joystickconect
         cache = []
         datasend=[]
@@ -379,4 +399,6 @@ def UIbuild():
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
+    pygame.display.init()
+    pygame.joystick.init()
     UIbuild()

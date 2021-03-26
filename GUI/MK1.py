@@ -10,6 +10,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
+import sys
 
 class ComboBox(QtWidgets.QComboBox):
     popupAboutToBeShown = QtCore.pyqtSignal()
@@ -116,7 +117,7 @@ class Ui_MK1(QMainWindow):
         sizePolicy.setHeightForWidth(self.re_se_data.sizePolicy().hasHeightForWidth())
         self.re_se_data.setSizePolicy(sizePolicy)
         self.re_se_data.setObjectName("re_se_data")
-        self.testsend = QtWidgets.QTextEdit(self.groupBox_4)
+        self.testsend = QtWidgets.QLineEdit(self.groupBox_4)
         self.testsend.setGeometry(QtCore.QRect(10, 290, 231, 31))
         self.testsend.setObjectName("testsend")
         self.send = QtWidgets.QPushButton(self.groupBox_4)
